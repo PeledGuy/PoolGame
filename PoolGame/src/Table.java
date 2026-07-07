@@ -49,23 +49,23 @@ public class Table extends JPanel {
         // Left Wall
         if (b.position.x - b.radius < 0) {
             b.position.x = b.radius; 
-            b.velocity.x *= -1;      
+            b.velocity.x *= -0.8;      
         }
         // Right Wall
         else if (b.position.x + b.radius > getWidth()) {
             b.position.x = getWidth() - b.radius;
-            b.velocity.x *= -1;
+            b.velocity.x *= -0.8;
         }
 
         // Top Wall
         if (b.position.y - b.radius < 0) {
             b.position.y = b.radius;
-            b.velocity.y *= -1;
+            b.velocity.y *= -0.8;
         }
         // Bottom Wall
         else if (b.position.y + b.radius > getHeight()) {
             b.position.y = getHeight() - b.radius;
-            b.velocity.y *= -1;
+            b.velocity.y *= -0.8;
         }
     }
 

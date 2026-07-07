@@ -21,6 +21,13 @@ public class Ball {
     }
 
     public void update(double dt) {
+        velocity.multiply(0.985);
+
+        if (velocity.magnitude() < 0.5) {
+            velocity.x = 0;
+            velocity.y = 0;
+        }
+
         Vector2D displacement = new Vector2D(velocity.x, velocity.y);
         displacement.multiply(dt);
 

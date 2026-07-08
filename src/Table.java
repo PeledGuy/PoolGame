@@ -5,20 +5,65 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.Point;
+
 public class Table extends JPanel {
     private ArrayList<Ball> balls;
     private Ball cueBall;
+
     private final double DELTA_TIME = 0.16;
+
+    private Point clickStart;
+    private Point currentDrag;
+    private boolean isAiming = false;
 
     public Table() {
         balls = new ArrayList<>();
 
-        cueBall = new Ball(100, 300, 157, 218, 15, Color.WHITE);
+        cueBall = new Ball(100, 300, 0, 0, 15, Color.WHITE);
         balls.add(cueBall);
         balls.add(new Ball(600, 300, 0, 0, 15, Color.RED));
 
         Timer timer = new Timer(16, e -> gameLoop());
         timer.start();
+
+        MouseAdapter mouse = new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                clickStart = e.getPoint();
+                currentDrag = e.getPoint();
+                isAiming = true;
+            }
+        
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                currentDrag = e.getPoint();
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                isAiming = false;
+
+                double dx = clickStart.x - e.getX();
+                double dy = clickStart.y - e.getY();
+                Vector2D dragVec = new Vector2D(dx, dy);
+
+                double maxDrag = 200.0;
+                if (dragVec.magnitude() > maxDrag) {
+                    dragVec = dragVec.normalize();
+                    dragVec.multiply(maxDrag);
+                }
+
+                Vector2D force = new Vector2D(dx * 50, dy * 50); 
+                cueBall.applyImpulse(force);
+            }
+        };
+
+        this.addMouseListener(mouse);
+        this.addMouseMotionListener(mouse);
+    
     }
 
     private void gameLoop() {
@@ -43,6 +88,26 @@ public class Table extends JPanel {
         for (Ball b : balls) {
             b.draw(g);
         }
+
+        // Draw aiming line trajectory
+        if (isAiming && clickStart != null && currentDrag != null) {
+            g.setColor(Color.WHITE);
+
+            Vector2D dragVec = new Vector2D(currentDrag.x - clickStart.x, currentDrag.y - clickStart.y);
+
+            double maxDrag = 200.0;
+            if (dragVec.magnitude() > maxDrag) {
+                dragVec = dragVec.normalize();
+                dragVec.multiply(maxDrag);
+            }
+
+            int drawX = (int) (dragVec.x / 2);
+            int drawY = (int) (dragVec.y / 2);
+
+            int cueX = (int) cueBall.position.x;
+            int cueY = (int) cueBall.position.y;
+
+            g.drawLine(cueX, cueY, cueX + drawX, cueY + drawY);        }
     }
 
     private void checkWallCollisions(Ball b) {
